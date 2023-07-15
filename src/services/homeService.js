@@ -12,8 +12,7 @@ const handleGetNameuser = async (idInput) => {
             where: { id: idInput },
             raw: true,
         });
-        if (res) {
-            console.log("check data: >>>>", res);
+        if (res && res.length > 0) {
             return {
                 errorCode: 0,
                 message: "Get user success",
