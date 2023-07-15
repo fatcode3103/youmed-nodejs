@@ -9,7 +9,7 @@ let initWebRoutes = (app) => {
     });
 
     ///mcv
-    router.get("/get-name-user", homeController.getNameUser);
+    router.get("/api/get-name-user", homeController.getNameUser);
 
     return app.use("/", router);
 };
