@@ -28,7 +28,7 @@ module.exports = {
                 password: "1112003",
                 firstName: "Dat",
                 lastName: "Van",
-                address: "Hà Nội",
+                address: "Ha Noi",
                 phoneNumber: "0976089462",
                 gender: "M",
                 positionId: "P1",

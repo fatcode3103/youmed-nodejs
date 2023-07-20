@@ -1,17 +1,8 @@
 import db from "../models/index";
 
-const handleGetNameuser = async (idInput) => {
+const handleGetNameUser = async () => {
     try {
-        if (!idInput) {
-            return {
-                errorCode: -1,
-                message: "Missing parameter",
-            };
-        }
-        let res = await db.User.findAll({
-            where: { id: idInput },
-            raw: true,
-        });
+        let res = await db.User.findAll();
         if (res && res.length > 0) {
             return {
                 errorCode: 0,
@@ -29,4 +20,4 @@ const handleGetNameuser = async (idInput) => {
     }
 };
 
-export { handleGetNameuser };
+export { handleGetNameUser };
