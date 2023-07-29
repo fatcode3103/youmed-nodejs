@@ -1,5 +1,8 @@
-import { emit } from "nodemon";
 import db from "../models";
+import { ROLE } from "../../utils/contants";
+
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const handleUserLogin = async (data) => {
     const { email, password } = data;
@@ -23,7 +26,8 @@ const handleUserLogin = async (data) => {
                 raw: true,
             });
             let data = {};
-            if (password === user.password) {
+
+            if (bcrypt.compareSync(password, user.password)) {
                 data = { ...user };
                 delete data.password;
                 return {
@@ -39,7 +43,7 @@ const handleUserLogin = async (data) => {
             }
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -78,7 +82,7 @@ const handlGetAllUser = async () => {
             };
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -100,7 +104,7 @@ const handleGetAllCode = async (type) => {
             };
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -115,16 +119,19 @@ const handlCreateUser = async (data) => {
                 message: "Email already exists !",
             };
         } else {
+            const hashPass = bcrypt.hashSync(data.password, saltRounds);
+
             let res = await db.User.create({
                 email: data.email,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
-                password: data.password,
+                password: hashPass,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
                 positionId: data.position,
                 roleId: data.role,
+                image: data.img,
             });
             if (res) {
                 return {
@@ -135,12 +142,12 @@ const handlCreateUser = async (data) => {
             } else {
                 return {
                     errorCode: 2,
-                    message: "Failed",
+                    message: "Create user failed",
                 };
             }
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -162,7 +169,7 @@ const handleDeleteUesr = async (id) => {
             };
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -173,16 +180,18 @@ const handleEditUser = async (data) => {
             raw: false,
         });
         if (user) {
+            const hashPass = bcrypt.hashSync(data.password, saltRounds);
             await user.update({
                 email: data.email,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
-                password: data.password,
+                password: hashPass,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
                 positionId: data.position,
                 roleId: data.role,
+                image: data.img,
             });
             await user.save();
             return {
@@ -196,7 +205,7 @@ const handleEditUser = async (data) => {
             };
         }
     } catch (e) {
-        return e;
+        throw e;
     }
 };
 
@@ -218,7 +227,182 @@ const handleGetUserById = async (id) => {
             };
         }
     } catch (e) {
-        return e;
+        throw e;
+    }
+};
+
+const handleGetAllDoctor = async () => {
+    try {
+        const doctors = await db.User.findAll({
+            where: { roleId: ROLE.DOCTOR },
+            attributes: {
+                exclude: ["password"],
+            },
+            include: [
+                {
+                    model: db.AllCode,
+                    as: "roleData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "positionData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "genderData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+            ],
+            nest: true,
+        });
+        if (doctors) {
+            return {
+                errorCode: 0,
+                message: "Create user successfully",
+                data: doctors,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleGetDoctorById = async (doctorId) => {
+    try {
+        const doctor = await db.User.findOne({
+            where: { roleId: ROLE.DOCTOR, id: doctorId },
+            attributes: {
+                exclude: ["password"],
+            },
+            include: [
+                {
+                    model: db.AllCode,
+                    as: "roleData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "positionData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "genderData",
+                    attributes: ["valueEn", "valueVi"],
+                },
+                {
+                    model: db.DoctorInfo,
+                    as: "detailInfoData",
+                    attributes: [
+                        "workPlace",
+                        "note",
+                        "introduction",
+                        "traningProcess",
+                        "experience",
+                    ],
+                },
+            ],
+            nest: true,
+        });
+        if (doctor) {
+            return {
+                errorCode: 0,
+                message: "Get doctor by id successfully",
+                data: doctor,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handlePostDoctorInfoById = async (data) => {
+    try {
+        let res = await db.DoctorInfo.create({
+            doctorId: data.selectedDoctor.value,
+            workPlace: data.workPlace,
+            note: data.note,
+            introduction: data.introduction,
+            traningProcess: data.traningProcess,
+            experience: data.experience,
+        });
+        if (res) {
+            return {
+                errorCode: 0,
+                message: "Create doctor info successfully !",
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Create doctor info failed !",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleGetDoctorDetailInfo = async (id) => {
+    try {
+        let res = await db.DoctorInfo.findOne({
+            where: { doctorId: id },
+        });
+        if (res) {
+            return {
+                errorCode: 0,
+                message: "Get doctor info successfully !",
+                data: res,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Get doctor info failed !",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handlePutDoctorDetailInfo = async (data) => {
+    try {
+        let res = await db.DoctorInfo.findOne({
+            where: { doctorId: data.doctorId },
+        });
+        if (res) {
+            await res.update({
+                doctorId: data.doctorId,
+                workPlace: data.workPlace,
+                note: data.note,
+                introduction: data.introduction,
+                traningProcess: data.traningProcess,
+                experience: data.experience,
+            });
+            await res.save();
+            return {
+                errorCode: 0,
+                message: "Update doctor info successfully !",
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Update doctor info failed !",
+            };
+        }
+    } catch (e) {
+        throw e;
     }
 };
 
@@ -230,4 +414,9 @@ export {
     handleDeleteUesr,
     handleEditUser,
     handleGetUserById,
+    handleGetAllDoctor,
+    handleGetDoctorById,
+    handlePostDoctorInfoById,
+    handleGetDoctorDetailInfo,
+    handlePutDoctorDetailInfo,
 };

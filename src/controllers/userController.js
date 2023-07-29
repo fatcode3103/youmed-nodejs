@@ -91,6 +91,71 @@ const getUserById = async (req, res) => {
     }
 };
 
+const getAllDoctor = async (req, res) => {
+    try {
+        let data = await userService.handleGetAllDoctor();
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getDoctorById = async (req, res) => {
+    try {
+        let data = await userService.handleGetDoctorById(req.query.doctorId);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const postDoctorInfoById = async (req, res) => {
+    try {
+        let mess = await userService.handlePostDoctorInfoById(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getDoctorDetailInfo = async (req, res) => {
+    try {
+        let data = await userService.handleGetDoctorDetailInfo(req.query.id);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const putDoctorDetailInfo = async (req, res) => {
+    try {
+        let mess = await userService.handlePutDoctorDetailInfo(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
 export {
     handleLogin,
     getAllUser,
@@ -99,4 +164,9 @@ export {
     deleteUser,
     editUser,
     getUserById,
+    getAllDoctor,
+    getDoctorById,
+    postDoctorInfoById,
+    getDoctorDetailInfo,
+    putDoctorDetailInfo,
 };
