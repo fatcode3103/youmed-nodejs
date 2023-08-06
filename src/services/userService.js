@@ -26,7 +26,6 @@ const handleUserLogin = async (data) => {
                 raw: true,
             });
             let data = {};
-
             if (bcrypt.compareSync(password, user.password)) {
                 data = { ...user };
                 delete data.password;
@@ -126,6 +125,7 @@ const handlCreateUser = async (data) => {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
+                dateOfBirth: data.date,
                 password: hashPass,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
@@ -186,6 +186,7 @@ const handleEditUser = async (data) => {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
+                dateOfBirth: data.date,
                 password: hashPass,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
@@ -302,6 +303,7 @@ const handleGetDoctorById = async (doctorId) => {
                     as: "detailInfoData",
                     attributes: [
                         "workPlace",
+                        "address",
                         "note",
                         "introduction",
                         "traningProcess",
@@ -333,6 +335,7 @@ const handlePostDoctorInfoById = async (data) => {
         let res = await db.DoctorInfo.create({
             doctorId: data.selectedDoctor.value,
             workPlace: data.workPlace,
+            address: data.address,
             note: data.note,
             introduction: data.introduction,
             traningProcess: data.traningProcess,
@@ -385,6 +388,7 @@ const handlePutDoctorDetailInfo = async (data) => {
             await res.update({
                 doctorId: data.doctorId,
                 workPlace: data.workPlace,
+                address: data.address,
                 note: data.note,
                 introduction: data.introduction,
                 traningProcess: data.traningProcess,
@@ -406,6 +410,120 @@ const handlePutDoctorDetailInfo = async (data) => {
     }
 };
 
+const handlePostDoctorSchedule = async (data) => {
+    try {
+        let res = await db.Schedule.findOne({
+            where: {
+                doctorId: data.selectedDoctor.value,
+                date: data.date,
+            },
+        });
+        if (res) {
+            return {
+                errorCode: -1,
+                message: "Already exist",
+            };
+        } else {
+            let res = await db.Schedule.create({
+                doctorId: data.selectedDoctor.value,
+                date: data.date,
+                timeType: data.timeJson,
+            });
+            if (res) {
+                return {
+                    errorCode: 0,
+                    message: "Post doctor schedule successfully !",
+                };
+            } else {
+                return {
+                    errorCode: 2,
+                    message: "Post doctor schedule failed !",
+                };
+            }
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleGetDoctorSchedule = async ({ date, doctorId }) => {
+    try {
+        let res = await db.Schedule.findOne({
+            where: {
+                date: date,
+                doctorId: doctorId,
+            },
+        });
+        if (!res) {
+            return {
+                errorCode: -1,
+                message: "Not found",
+            };
+        } else {
+            return {
+                errorCode: 0,
+                message: "Get schedule success",
+                data: res,
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleUpdateDoctorSchedule = async (data) => {
+    try {
+        let res = await db.Schedule.findOne({
+            where: {
+                date: data.date,
+                doctorId: data.doctorId,
+            },
+        });
+        if (!res) {
+            return {
+                errorCode: -1,
+                message: "Not found",
+            };
+        } else {
+            await res.update({
+                timeType: data.time,
+                timestamp: data.timestamp,
+            });
+            await res.save();
+            return {
+                errorCode: 0,
+                message: "UPdate schedule success",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleGetDoctorScheduleById = async (doctorId) => {
+    try {
+        let res = await db.Schedule.findAll({
+            where: {
+                doctorId: doctorId,
+            },
+        });
+        if (!res) {
+            return {
+                errorCode: -1,
+                message: "Not found",
+            };
+        } else {
+            return {
+                errorCode: 0,
+                message: "Get all schedule by id success",
+                data: res,
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
 export {
     handleUserLogin,
     handlGetAllUser,
@@ -419,4 +537,8 @@ export {
     handlePostDoctorInfoById,
     handleGetDoctorDetailInfo,
     handlePutDoctorDetailInfo,
+    handlePostDoctorSchedule,
+    handleGetDoctorSchedule,
+    handleUpdateDoctorSchedule,
+    handleGetDoctorScheduleById,
 };

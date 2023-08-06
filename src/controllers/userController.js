@@ -156,6 +156,58 @@ const putDoctorDetailInfo = async (req, res) => {
     }
 };
 
+const postDoctorSchedule = async (req, res) => {
+    try {
+        let mess = await userService.handlePostDoctorSchedule(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getDoctorSchedule = async (req, res) => {
+    try {
+        let data = await userService.handleGetDoctorSchedule(req.query);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const updateDoctorSchedule = async (req, res) => {
+    try {
+        let data = await userService.handleUpdateDoctorSchedule(req.body);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getDoctorScheduleById = async (req, res) => {
+    try {
+        let data = await userService.handleGetDoctorScheduleById(req.query.id);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
 export {
     handleLogin,
     getAllUser,
@@ -169,4 +221,8 @@ export {
     postDoctorInfoById,
     getDoctorDetailInfo,
     putDoctorDetailInfo,
+    postDoctorSchedule,
+    getDoctorSchedule,
+    updateDoctorSchedule,
+    getDoctorScheduleById,
 };

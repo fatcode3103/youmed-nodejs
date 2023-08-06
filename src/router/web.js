@@ -32,6 +32,16 @@ let initWebRoutes = (app) => {
         "/api/update-doctor-detail-info",
         userController.putDoctorDetailInfo
     );
+    router.post("/api/post-doctor-schedule", userController.postDoctorSchedule);
+    router.get("/api/get-doctor-schedule", userController.getDoctorSchedule);
+    router.get(
+        "/api/get-doctor-schedule-by-id",
+        userController.getDoctorScheduleById
+    );
+    router.put(
+        "/api/update-doctor-schedule",
+        userController.updateDoctorSchedule
+    );
 
     return app.use("/", router);
 };
