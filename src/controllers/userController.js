@@ -208,6 +208,19 @@ const getDoctorScheduleById = async (req, res) => {
     }
 };
 
+const postPatientBookAppointment = async (req, res) => {
+    try {
+        let mess = await userService.handlePostPatientBookAppointment(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
 export {
     handleLogin,
     getAllUser,
@@ -225,4 +238,5 @@ export {
     getDoctorSchedule,
     updateDoctorSchedule,
     getDoctorScheduleById,
+    postPatientBookAppointment,
 };

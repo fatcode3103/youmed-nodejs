@@ -1,5 +1,7 @@
 import db from "../models";
-import { ROLE } from "../../utils/contants";
+import { ROLE, STATUS } from "../../utils/contants";
+
+import sendEmail from "./sendEmailService";
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -180,14 +182,14 @@ const handleEditUser = async (data) => {
             raw: false,
         });
         if (user) {
-            const hashPass = bcrypt.hashSync(data.password, saltRounds);
+            // const hashPass = bcrypt.hashSync(data.password, saltRounds);
             await user.update({
                 email: data.email,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
                 dateOfBirth: data.date,
-                password: hashPass,
+                password: data.password,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
                 positionId: data.position,
@@ -255,14 +257,46 @@ const handleGetAllDoctor = async () => {
                     as: "genderData",
                     attributes: ["valueEn", "valueVi"],
                 },
+                {
+                    model: db.DoctorInfo,
+                    as: "detailInfoData",
+                    attributes: ["workPlace"],
+                },
+                {
+                    model: db.Doctor_Specialty,
+                    as: "doctorSpecialtyData",
+                    include: [
+                        {
+                            model: db.Specialty,
+                            as: "specialtyData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
+                    ],
+                },
             ],
+            raw: true,
             nest: true,
         });
         if (doctors) {
+            const doctorMap = {};
+            doctors.forEach((item) => {
+                const { ...res } = item;
+                if (!doctorMap[res.id]) {
+                    doctorMap[res.id] = {
+                        ...res,
+                        specialtyData: [],
+                    };
+                }
+                doctorMap[res.id].specialtyData.push(
+                    res.doctorSpecialtyData.specialtyData
+                );
+                delete doctorMap[res.id].doctorSpecialtyData;
+            });
+            const result = Object.values(doctorMap);
             return {
                 errorCode: 0,
                 message: "Create user successfully",
-                data: doctors,
+                data: result,
             };
         } else {
             return {
@@ -277,7 +311,7 @@ const handleGetAllDoctor = async () => {
 
 const handleGetDoctorById = async (doctorId) => {
     try {
-        const doctor = await db.User.findOne({
+        const doctor = await db.User.findAll({
             where: { roleId: ROLE.DOCTOR, id: doctorId },
             attributes: {
                 exclude: ["password"],
@@ -304,20 +338,42 @@ const handleGetDoctorById = async (doctorId) => {
                     attributes: [
                         "workPlace",
                         "address",
+                        "addressMap",
                         "note",
                         "introduction",
                         "traningProcess",
                         "experience",
+                        "yearExperience",
+                    ],
+                },
+                {
+                    model: db.Doctor_Specialty,
+                    as: "doctorSpecialtyData",
+                    include: [
+                        {
+                            model: db.Specialty,
+                            as: "specialtyData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
                     ],
                 },
             ],
+            raw: true,
             nest: true,
         });
         if (doctor) {
+            let arr = [];
+            doctor.forEach((item) => {
+                arr.push(item.doctorSpecialtyData.specialtyData);
+            });
+            delete doctor[0].doctorSpecialtyData;
             return {
                 errorCode: 0,
                 message: "Get doctor by id successfully",
-                data: doctor,
+                data: {
+                    ...doctor[0],
+                    specialtyData: arr,
+                },
             };
         } else {
             return {
@@ -336,10 +392,12 @@ const handlePostDoctorInfoById = async (data) => {
             doctorId: data.selectedDoctor.value,
             workPlace: data.workPlace,
             address: data.address,
+            addressMap: data.addressMap,
             note: data.note,
             introduction: data.introduction,
             traningProcess: data.traningProcess,
             experience: data.experience,
+            yearExperience: data.yearExperience,
         });
         if (res) {
             return {
@@ -389,10 +447,12 @@ const handlePutDoctorDetailInfo = async (data) => {
                 doctorId: data.doctorId,
                 workPlace: data.workPlace,
                 address: data.address,
+                addressMap: data.addressMap,
                 note: data.note,
                 introduction: data.introduction,
                 traningProcess: data.traningProcess,
                 experience: data.experience,
+                yearExperience: data.yearExperience,
             });
             await res.save();
             return {
@@ -524,6 +584,41 @@ const handleGetDoctorScheduleById = async (doctorId) => {
     }
 };
 
+const handlePostPatientBookAppointment = async (data) => {
+    try {
+        const [res, created] = await db.Booking.findOrCreate({
+            where: {
+                doctorId: data.doctorId,
+                patientId: data.patientId,
+                date: data.date,
+                timeType: data.timeType,
+            },
+            defaults: {
+                status: STATUS.S1,
+                doctorId: data.doctorId,
+                patientId: data.patientId,
+                note: data.note,
+                date: data.date,
+                timeType: data.timeType,
+            },
+        });
+        if (!created) {
+            return {
+                errorCode: -1,
+                message: "Create book appointment failed",
+            };
+        } else {
+            await sendEmail(data.sendToEmail);
+            return {
+                errorCode: 0,
+                message: "Create book appointment success",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
 export {
     handleUserLogin,
     handlGetAllUser,
@@ -541,4 +636,5 @@ export {
     handleGetDoctorSchedule,
     handleUpdateDoctorSchedule,
     handleGetDoctorScheduleById,
+    handlePostPatientBookAppointment,
 };

@@ -1,5 +1,6 @@
 import express from "express";
 import * as userController from "../controllers/userController";
+import * as specialtyController from "../controllers/specialtyController";
 
 let router = express.Router();
 
@@ -41,6 +42,24 @@ let initWebRoutes = (app) => {
     router.put(
         "/api/update-doctor-schedule",
         userController.updateDoctorSchedule
+    );
+
+    //specialty
+    router.post("/api/post-specialty", specialtyController.createSpecialty);
+    router.get("/api/get-all-specialty", specialtyController.getAllSpecialty);
+    router.post(
+        "/api/post-doctor-specialty",
+        specialtyController.createDoctorSpecialty
+    );
+    router.get(
+        "/api/get-specialty-by-doctor",
+        specialtyController.getSpecialtyByDoctor
+    );
+
+    //booking
+    router.post(
+        "/api/post-patient-book-appointment",
+        userController.postPatientBookAppointment
     );
 
     return app.use("/", router);
