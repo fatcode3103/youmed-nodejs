@@ -1,6 +1,7 @@
 import express from "express";
 import * as userController from "../controllers/userController";
 import * as specialtyController from "../controllers/specialtyController";
+import * as hospitalController from "../controllers/hospitalController";
 
 let router = express.Router();
 
@@ -60,6 +61,27 @@ let initWebRoutes = (app) => {
     router.post(
         "/api/post-patient-book-appointment",
         userController.postPatientBookAppointment
+    );
+    router.post(
+        "/api/post-veirfy-book-appointment",
+        userController.postVerifyBookAppointment
+    );
+
+    //hospital
+    router.post("/api/post-hospital", hospitalController.createHospital);
+    router.get("/api/get-all-hospital", hospitalController.getAllHospital);
+    router.post(
+        "/api/post-hospital-detail",
+        hospitalController.createHospitalDetail
+    );
+    router.post(
+        "/api/post-hospital-specialty",
+        hospitalController.createHospitalSpecialty
+    );
+    router.get("/api/get-hospital-by-id", hospitalController.getHospitalById);
+    router.get(
+        "/api/get-hospital-specialty-by-id",
+        hospitalController.getHospitaSpecialtylById
     );
 
     return app.use("/", router);

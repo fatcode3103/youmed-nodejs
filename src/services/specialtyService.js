@@ -65,7 +65,6 @@ const handleCreateDoctorSpecialty = async (data) => {
                     return {
                         errorCode: 0,
                         message: "Create doctor specialty success",
-                        data: res,
                     };
                 } else {
                     return {
@@ -73,11 +72,7 @@ const handleCreateDoctorSpecialty = async (data) => {
                         message: "Create doctor specialty failed",
                     };
                 }
-            } else {
-                console.log("No change in value");
             }
-        } else {
-            console.log("data or dataFromDb is undefined or null");
         }
     } catch (e) {
         throw e;

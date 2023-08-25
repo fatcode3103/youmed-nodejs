@@ -1,10 +1,18 @@
 import db from "../models";
-import { ROLE, STATUS } from "../../utils/contants";
+import { v4 as uuidv4 } from "uuid";
 
+import { ROLE, STATUS } from "../../utils/contants";
 import sendEmail from "./sendEmailService";
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+
+const buildUrlVerifyEmail = (doctorId, patientId) => {
+    let res = "";
+    let token = uuidv4();
+    res = `http://localhost:3000/verify-booking?doctorId=${doctorId}&patientId=${patientId}&token=${token}`;
+    return { res, token };
+};
 
 const handleUserLogin = async (data) => {
     const { email, password } = data;
@@ -234,10 +242,13 @@ const handleGetUserById = async (id) => {
     }
 };
 
-const handleGetAllDoctor = async () => {
+const handleGetAllDoctor = async (limit) => {
     try {
         const doctors = await db.User.findAll({
-            where: { roleId: ROLE.DOCTOR },
+            where: {
+                roleId: ROLE.DOCTOR,
+            },
+            limit: limit ? +limit : null,
             attributes: {
                 exclude: ["password"],
             },
@@ -586,6 +597,10 @@ const handleGetDoctorScheduleById = async (doctorId) => {
 
 const handlePostPatientBookAppointment = async (data) => {
     try {
+        const { res: result, token } = buildUrlVerifyEmail(
+            data.doctorId,
+            data.patientId
+        );
         const [res, created] = await db.Booking.findOrCreate({
             where: {
                 doctorId: data.doctorId,
@@ -600,6 +615,7 @@ const handlePostPatientBookAppointment = async (data) => {
                 note: data.note,
                 date: data.date,
                 timeType: data.timeType,
+                token: token,
             },
         });
         if (!created) {
@@ -608,11 +624,55 @@ const handlePostPatientBookAppointment = async (data) => {
                 message: "Create book appointment failed",
             };
         } else {
-            await sendEmail(data.sendToEmail);
+            const dataSendToEmail = {
+                ...data.sendToEmail,
+                redirectLink: result,
+                note: data.note,
+            };
+            await sendEmail(dataSendToEmail);
             return {
                 errorCode: 0,
                 message: "Create book appointment success",
             };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handlePostVerifyBookAppointment = async (data) => {
+    const { doctorId, patientId, token } = data;
+    try {
+        if (!doctorId || !patientId || !token) {
+            return {
+                errorCode: -1,
+                message: "Missing parameter",
+            };
+        } else {
+            let res = await db.Booking.findOne({
+                where: {
+                    doctorId: doctorId,
+                    patientId: patientId,
+                    token: token,
+                    status: STATUS.S1,
+                },
+                raw: false,
+            });
+            if (res) {
+                await res.update({
+                    status: STATUS.S2,
+                });
+                await res.save();
+                return {
+                    errorCode: 0,
+                    message: "Appointment confirmed successfully",
+                };
+            } else {
+                return {
+                    errorCode: 2,
+                    message: "Appointment does not exist or has been confirmed",
+                };
+            }
         }
     } catch (e) {
         throw e;
@@ -637,4 +697,5 @@ export {
     handleUpdateDoctorSchedule,
     handleGetDoctorScheduleById,
     handlePostPatientBookAppointment,
+    handlePostVerifyBookAppointment,
 };

@@ -44,7 +44,7 @@ const sendEmail = async (data) => {
             </div>
             <p><b>Lưu ý</b>: Vui lòng có mặt <b>10 phút</b> trước giờ đặt khám và xuất trình xác nhận này cho nhân viên phòng khám hoặc bác sĩ để được phục vụ chu đáo.</p>
             <p>Bạn có thắc mắc? Liên hệ <b>1900 2805</b></p>
-            <a href="https://www.facebook.com/profile.php?id=100034110155872">Nhấp để xác nhận lịch khám</a>
+            <a href=${data.redirectLink}>Nhấp để xác nhận lịch khám</a>
             <h4 style="color: #26ae5d;">Cảm ơn bạn đã sử dụng dịch vụ của FatCode</h4>
         </div>
         `
@@ -71,7 +71,7 @@ const sendEmail = async (data) => {
             </div>
             <p><b>Attention</b>: Please arrive <b>10 minutes</b> before your appointment time and present this confirmation to the clinic staff or doctor for attentive service.</p>
             <p>Do you have questions? Contact <b>1900 2805</b></p>
-            <a href="https://www.facebook.com/profile.php?id=100034110155872">Click to confirm appointment</a>
+            <a href=${data.redirectLink}>Click to confirm appointment</a>
             <h4 style="color: #26ae5d;">Thank you for using FatCode's service</h4>
         </div>
         `,

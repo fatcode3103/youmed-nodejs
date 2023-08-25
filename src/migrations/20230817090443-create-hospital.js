@@ -2,20 +2,26 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable("Hospitals", {
+        await queryInterface.createTable("hospitals", {
             id: {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
-            image: {
-                type: Sequelize.BLOB("long"),
-            },
             name: {
                 type: Sequelize.STRING,
             },
+            logo: {
+                type: Sequelize.BLOB("long"),
+            },
+            coverImg: {
+                type: Sequelize.BLOB("long"),
+            },
             address: {
+                type: Sequelize.STRING,
+            },
+            addressMap: {
                 type: Sequelize.STRING,
             },
             createdAt: {
@@ -29,6 +35,6 @@ module.exports = {
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable("Hospitals");
+        await queryInterface.dropTable("hospitals");
     },
 };
