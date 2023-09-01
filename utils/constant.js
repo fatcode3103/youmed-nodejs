@@ -9,3 +9,9 @@ export const STATUS = {
     S2: "S2",
     S3: "S3",
 };
+
+export const OBJECT = {
+    DOCTOR: "DOCTOR",
+    HOSPITAL: "HOSPITAL",
+    CLINIC: "CLINIC",
+};

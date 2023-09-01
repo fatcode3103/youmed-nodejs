@@ -1,7 +1,7 @@
 import db from "../models";
 import { v4 as uuidv4 } from "uuid";
 
-import { ROLE, STATUS } from "../../utils/contants";
+import { ROLE, STATUS, OBJECT } from "../../utils/constant";
 import sendEmail from "./sendEmailService";
 
 const bcrypt = require("bcrypt");
@@ -586,7 +586,7 @@ const handleGetDoctorScheduleById = async (doctorId) => {
         } else {
             return {
                 errorCode: 0,
-                message: "Get all schedule by id success",
+                message: "Get doctor schedule by id success",
                 data: res,
             };
         }
@@ -597,24 +597,47 @@ const handleGetDoctorScheduleById = async (doctorId) => {
 
 const handlePostPatientBookAppointment = async (data) => {
     try {
-        const { res: result, token } = buildUrlVerifyEmail(
-            data.doctorId,
-            data.patientId
-        );
+        const {
+            date,
+            entityId,
+            namePatient,
+            emailPatient,
+            patientId,
+            timeType,
+            entityInfo,
+            language,
+            patientInfo,
+            distinguishSubjectExamination,
+        } = data;
+        const { res: result, token } = buildUrlVerifyEmail(entityId, patientId);
+        let condition = {
+            patientId: patientId,
+            date: date,
+            timeType: timeType,
+            doctorId: null,
+            hospitalId: null,
+            clinicId: null,
+        };
+
+        if (distinguishSubjectExamination === OBJECT.DOCTOR) {
+            condition.doctorId = entityId;
+        } else if (distinguishSubjectExamination === OBJECT.HOSPITAL) {
+            condition.hospitalId = entityId;
+        } else if (distinguishSubjectExamination === OBJECT.CLINIC) {
+            condition.clinicId = entityId;
+        }
         const [res, created] = await db.Booking.findOrCreate({
             where: {
-                doctorId: data.doctorId,
-                patientId: data.patientId,
-                date: data.date,
-                timeType: data.timeType,
+                ...condition,
             },
             defaults: {
                 status: STATUS.S1,
-                doctorId: data.doctorId,
-                patientId: data.patientId,
-                note: data.note,
-                date: data.date,
-                timeType: data.timeType,
+                doctorId: condition.doctorId,
+                hospitalId: condition.hospitalId,
+                hospitalId: condition.clinicId,
+                patientId: patientId,
+                date: date,
+                timeType: timeType,
                 token: token,
             },
         });
@@ -625,9 +648,12 @@ const handlePostPatientBookAppointment = async (data) => {
             };
         } else {
             const dataSendToEmail = {
-                ...data.sendToEmail,
+                entityInfo: entityInfo,
                 redirectLink: result,
-                note: data.note,
+                patientInfo: patientInfo,
+                language: language,
+                namePatient: namePatient,
+                emailPatient: emailPatient,
             };
             await sendEmail(dataSendToEmail);
             return {

@@ -79,9 +79,29 @@ let initWebRoutes = (app) => {
         hospitalController.createHospitalSpecialty
     );
     router.get("/api/get-hospital-by-id", hospitalController.getHospitalById);
+    router.put(
+        "/api/update-hospital-detail",
+        hospitalController.updateHospitalDetail
+    );
     router.get(
         "/api/get-hospital-specialty-by-id",
         hospitalController.getHospitaSpecialtylById
+    );
+    router.post(
+        "/api/create-hospital-schedule",
+        hospitalController.createHospitalSchedule
+    );
+    router.get(
+        "/api/get-hospital-schedule",
+        hospitalController.getHospitalSchedule
+    );
+    router.put(
+        "/api/update-hospital-schedule",
+        hospitalController.updateHospitalSchedule
+    );
+    router.get(
+        "/api/get-hospital-schedule-by-id",
+        hospitalController.getHospitalScheduleById
     );
 
     return app.use("/", router);
