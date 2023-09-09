@@ -2,7 +2,6 @@ require("dotenv").config();
 import nodemailer from "nodemailer";
 
 const sendEmail = async (data) => {
-    console.log("check data to email:>>> ", data);
     const {
         entityInfo,
         redirectLink,
@@ -10,6 +9,7 @@ const sendEmail = async (data) => {
         language,
         emailPatient,
         namePatient,
+        otherPropObj,
     } = data;
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -22,6 +22,19 @@ const sendEmail = async (data) => {
     });
     const handleRenderHtmlToEmail = (infoArr) => {
         const arr = infoArr.map((item, index) => {
+            return `<p key=${index}>- ${item.label}: ${
+                item.value
+                    ? item.value
+                    : language === "vi"
+                    ? "Không có"
+                    : "Not available"
+            }</p>`;
+        });
+        return arr.join("");
+    };
+
+    const handleRenderOtherPropToEmail = (otherPropObj) => {
+        const arr = Object.values(otherPropObj).map((item, index) => {
             return `<p key=${index}>- ${item.label}: ${
                 item.value
                     ? item.value
@@ -49,6 +62,7 @@ const sendEmail = async (data) => {
                 <h4>Thông tin đăt khám</h4>
                 <div>
                     ${handleRenderHtmlToEmail(entityInfo)}
+                    ${handleRenderOtherPropToEmail(otherPropObj)}
                 </div>
                 <h4>Thông tin bệnh nhân</h4>
                 <div>

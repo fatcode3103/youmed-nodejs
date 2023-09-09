@@ -223,8 +223,23 @@ const postPatientBookAppointment = async (req, res) => {
 
 const postVerifyBookAppointment = async (req, res) => {
     try {
-        let mess = await userService.handlePostVerifyBookAppointment(req.query);
-        return res.status(200).json(mess);
+        let data = await userService.handlePostVerifyBookAppointment(req.query);
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const postSuccessBookAppointment = async (req, res) => {
+    try {
+        let data = await userService.handlePostSuccessBookAppointment(
+            req.query
+        );
+        return res.status(200).json(data);
     } catch (e) {
         console.log(e);
         return res.status(200).json({
@@ -253,4 +268,5 @@ export {
     getDoctorScheduleById,
     postPatientBookAppointment,
     postVerifyBookAppointment,
+    postSuccessBookAppointment,
 };

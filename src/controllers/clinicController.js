@@ -1,10 +1,11 @@
-import * as hospitalService from "../services/hospitalService";
+import * as clinicService from "../services/clinicService";
 
-const createHospital = async (req, res) => {
+const createClinic = async (req, res) => {
     try {
-        let mess = await hospitalService.handleCreateHospital(req.body);
+        let mess = await clinicService.handleCreateClinic(req.body);
         return res.status(200).json(mess);
     } catch (e) {
+        console.log(e);
         return res.status(200).json({
             errorCode: 1,
             message: "Error from the server",
@@ -12,49 +13,9 @@ const createHospital = async (req, res) => {
     }
 };
 
-const getAllHospital = async (req, res) => {
+const getAllClinic = async (req, res) => {
     try {
-        let data = await hospitalService.handleGetAllHospital(req.query.limit);
-        return res.status(200).json(data);
-    } catch (e) {
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const createHospitalDetail = async (req, res) => {
-    try {
-        let mess = await hospitalService.handleCreateHospitalDetail(req.body);
-        return res.status(200).json(mess);
-    } catch (e) {
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const createHospitalSpecialty = async (req, res) => {
-    try {
-        let mess = await hospitalService.handleCreateHospitalSpecialty(
-            req.body
-        );
-        return res.status(200).json(mess);
-    } catch (e) {
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const getHospitalById = async (req, res) => {
-    try {
-        let data = await hospitalService.handleGetHospitalById(
-            req.query.hospitalId
-        );
+        let data = await clinicService.handleGetAllClinic(req.query.limit);
         return res.status(200).json(data);
     } catch (e) {
         console.log(e);
@@ -65,11 +26,74 @@ const getHospitalById = async (req, res) => {
     }
 };
 
-const getHospitaSpecialtylById = async (req, res) => {
+const getClinicById = async (req, res) => {
     try {
-        let data = await hospitalService.handleGetHospitaSpecialtylById(
-            req.query.hospitalId
-        );
+        let mess = await clinicService.handleGetClinicById(req.query.clinicId);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const createClinicSpecialty = async (req, res) => {
+    try {
+        let mess = await clinicService.handleCreateClinicSpecialty(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const createClinicDetail = async (req, res) => {
+    try {
+        let mess = await clinicService.handleCreateClinicDetail(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const updateClinicDetail = async (req, res) => {
+    try {
+        let mess = await clinicService.handleUpdateClinicDetail(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const createClinicSchedule = async (req, res) => {
+    try {
+        let mess = await clinicService.handleCreateClinicSchedule(req.body);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getClinicSchedule = async (req, res) => {
+    try {
+        let data = await clinicService.handleGetClinicSchedule(req.query);
         return res.status(200).json(data);
     } catch (e) {
         console.log(e);
@@ -80,9 +104,9 @@ const getHospitaSpecialtylById = async (req, res) => {
     }
 };
 
-const updateHospitalDetail = async (req, res) => {
+const updateClinicScheduleById = async (req, res) => {
     try {
-        let mess = await hospitalService.handleUpdateHospitalDetail(req.body);
+        let mess = await clinicService.handleUpdateClinicScheduleById(req.body);
         return res.status(200).json(mess);
     } catch (e) {
         console.log(e);
@@ -93,49 +117,10 @@ const updateHospitalDetail = async (req, res) => {
     }
 };
 
-const createHospitalSchedule = async (req, res) => {
+const getClinicScheduleById = async (req, res) => {
     try {
-        let mess = await hospitalService.handleCreateHospitalSchedule(req.body);
-        return res.status(200).json(mess);
-    } catch (e) {
-        console.log(e);
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const getHospitalSchedule = async (req, res) => {
-    try {
-        let data = await hospitalService.handleGetHospitalSchedule(req.query);
-        return res.status(200).json(data);
-    } catch (e) {
-        console.log(e);
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const updateHospitalSchedule = async (req, res) => {
-    try {
-        let mess = await hospitalService.handleUpdateHospitalSchedule(req.body);
-        return res.status(200).json(mess);
-    } catch (e) {
-        console.log(e);
-        return res.status(200).json({
-            errorCode: 1,
-            message: "Error from the server",
-        });
-    }
-};
-
-const getHospitalScheduleById = async (req, res) => {
-    try {
-        let data = await hospitalService.handleGetHospitalScheduleById(
-            req.query.hospitalId
+        let data = await clinicService.handleGetClinicScheduleById(
+            req.query.clinicId
         );
         return res.status(200).json(data);
     } catch (e) {
@@ -148,15 +133,14 @@ const getHospitalScheduleById = async (req, res) => {
 };
 
 export {
-    createHospital,
-    getAllHospital,
-    createHospitalDetail,
-    createHospitalSpecialty,
-    getHospitalById,
-    getHospitaSpecialtylById,
-    updateHospitalDetail,
-    createHospitalSchedule,
-    getHospitalSchedule,
-    updateHospitalSchedule,
-    getHospitalScheduleById,
+    createClinic,
+    getAllClinic,
+    getClinicById,
+    createClinicSpecialty,
+    createClinicDetail,
+    updateClinicDetail,
+    createClinicSchedule,
+    getClinicSchedule,
+    updateClinicScheduleById,
+    getClinicScheduleById,
 };

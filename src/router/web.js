@@ -2,6 +2,7 @@ import express from "express";
 import * as userController from "../controllers/userController";
 import * as specialtyController from "../controllers/specialtyController";
 import * as hospitalController from "../controllers/hospitalController";
+import * as clinicController from "../controllers/clinicController";
 
 let router = express.Router();
 
@@ -63,8 +64,12 @@ let initWebRoutes = (app) => {
         userController.postPatientBookAppointment
     );
     router.post(
-        "/api/post-veirfy-book-appointment",
+        "/api/post-verify-book-appointment",
         userController.postVerifyBookAppointment
+    );
+    router.post(
+        "/api/post-success-appointment",
+        userController.postSuccessBookAppointment
     );
 
     //hospital
@@ -102,6 +107,35 @@ let initWebRoutes = (app) => {
     router.get(
         "/api/get-hospital-schedule-by-id",
         hospitalController.getHospitalScheduleById
+    );
+    // clinic
+    router.post("/api/create-clinic", clinicController.createClinic);
+    router.get("/api/get-all-clinic", clinicController.getAllClinic);
+    router.get("/api/get-clinic-by-id", clinicController.getClinicById);
+    router.post(
+        "/api/create-clinic-specialty",
+        clinicController.createClinicSpecialty
+    );
+    router.post(
+        "/api/create-clinic-detail",
+        clinicController.createClinicDetail
+    );
+    router.put(
+        "/api/update-clinic-detail",
+        clinicController.updateClinicDetail
+    );
+    router.post(
+        "/api/create-clinic-schedule",
+        clinicController.createClinicSchedule
+    );
+    router.get("/api/get-clinic-schedule", clinicController.getClinicSchedule);
+    router.put(
+        "/api/update-clinic-schedule-by-id",
+        clinicController.updateClinicScheduleById
+    );
+    router.get(
+        "/api/get-clinic-schedule-by-id",
+        clinicController.getClinicScheduleById
     );
 
     return app.use("/", router);

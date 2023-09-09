@@ -7,11 +7,27 @@ import sendEmail from "./sendEmailService";
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-const buildUrlVerifyEmail = (doctorId, patientId) => {
-    let res = "";
+var _ = require("lodash");
+
+const buildUrlVerifyEmail = (
+    distinguishSubjectExamination,
+    entityId,
+    patientId
+) => {
+    let linkCofirmAppointment = "";
+    let linkSuccessAppointment = "";
     let token = uuidv4();
-    res = `http://localhost:3000/verify-booking?doctorId=${doctorId}&patientId=${patientId}&token=${token}`;
-    return { res, token };
+
+    if (distinguishSubjectExamination === OBJECT.DOCTOR) {
+        linkCofirmAppointment = `http://localhost:3000/verify-booking?doctorId=${entityId}&patientId=${patientId}&token=${token}`;
+    } else if (distinguishSubjectExamination === OBJECT.HOSPITAL) {
+        linkCofirmAppointment = `http://localhost:3000/verify-booking?hospitalId=${entityId}&patientId=${patientId}&token=${token}`;
+    } else if (distinguishSubjectExamination === OBJECT.CLINIC) {
+        linkCofirmAppointment = `http://localhost:3000/verify-booking?clinicId=${entityId}&patientId=${patientId}&token=${token}`;
+    }
+    linkSuccessAppointment = `/success-booking/errorCode=0?patientId=${patientId}&token=${token}`;
+
+    return { linkSuccessAppointment, linkCofirmAppointment, token };
 };
 
 const handleUserLogin = async (data) => {
@@ -608,8 +624,16 @@ const handlePostPatientBookAppointment = async (data) => {
             language,
             patientInfo,
             distinguishSubjectExamination,
+            ...otherPropObj
         } = data;
-        const { res: result, token } = buildUrlVerifyEmail(entityId, patientId);
+
+        const { linkSuccessAppointment, linkCofirmAppointment, token } =
+            buildUrlVerifyEmail(
+                distinguishSubjectExamination,
+                entityId,
+                patientId
+            );
+
         let condition = {
             patientId: patientId,
             date: date,
@@ -634,7 +658,7 @@ const handlePostPatientBookAppointment = async (data) => {
                 status: STATUS.S1,
                 doctorId: condition.doctorId,
                 hospitalId: condition.hospitalId,
-                hospitalId: condition.clinicId,
+                clinicId: condition.clinicId,
                 patientId: patientId,
                 date: date,
                 timeType: timeType,
@@ -649,16 +673,18 @@ const handlePostPatientBookAppointment = async (data) => {
         } else {
             const dataSendToEmail = {
                 entityInfo: entityInfo,
-                redirectLink: result,
+                redirectLink: linkCofirmAppointment,
                 patientInfo: patientInfo,
                 language: language,
                 namePatient: namePatient,
                 emailPatient: emailPatient,
+                otherPropObj: otherPropObj,
             };
             await sendEmail(dataSendToEmail);
             return {
                 errorCode: 0,
                 message: "Create book appointment success",
+                data: linkSuccessAppointment,
             };
         }
     } catch (e) {
@@ -667,9 +693,10 @@ const handlePostPatientBookAppointment = async (data) => {
 };
 
 const handlePostVerifyBookAppointment = async (data) => {
-    const { doctorId, patientId, token } = data;
+    const { patientId, token, ...entityId } = data;
+    const { doctorId = null, hospitalId = null, clinicId = null } = entityId;
     try {
-        if (!doctorId || !patientId || !token) {
+        if (_.values(entityId).includes(null) || !patientId || !token) {
             return {
                 errorCode: -1,
                 message: "Missing parameter",
@@ -678,6 +705,8 @@ const handlePostVerifyBookAppointment = async (data) => {
             let res = await db.Booking.findOne({
                 where: {
                     doctorId: doctorId,
+                    hospitalId: hospitalId,
+                    clinicId: clinicId,
                     patientId: patientId,
                     token: token,
                     status: STATUS.S1,
@@ -705,6 +734,38 @@ const handlePostVerifyBookAppointment = async (data) => {
     }
 };
 
+const handlePostSuccessBookAppointment = async (data) => {
+    try {
+        const { patientId, token } = data;
+        if (!patientId || !token) {
+            return {
+                errorCode: -1,
+                message: "Missing parameter",
+            };
+        } else {
+            let res = await db.Booking.findOne({
+                where: {
+                    patientId: patientId,
+                    token: token,
+                },
+            });
+            if (res) {
+                return {
+                    errorCode: 0,
+                    message: "Booking successfully",
+                };
+            } else {
+                return {
+                    errorCode: 2,
+                    message: "Booking failed",
+                };
+            }
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
 export {
     handleUserLogin,
     handlGetAllUser,
@@ -724,4 +785,5 @@ export {
     handleGetDoctorScheduleById,
     handlePostPatientBookAppointment,
     handlePostVerifyBookAppointment,
+    handlePostSuccessBookAppointment,
 };

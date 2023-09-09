@@ -27,9 +27,12 @@ const handleCreateHospital = async (data) => {
     }
 };
 
-const handleGetAllHospital = async () => {
+const handleGetAllHospital = async (limit) => {
     try {
-        let res = await db.hospital.findAll();
+        let res = await db.hospital.findAll({
+            limit: limit ? +limit : null,
+            raw: true,
+        });
         if (res) {
             return {
                 errorCode: 0,
@@ -233,7 +236,6 @@ const handleUpdateHospitalDetail = async (data) => {
             return {
                 errorCode: 0,
                 message: "Update hospital detail success",
-                data: res,
             };
         } else {
             return {
