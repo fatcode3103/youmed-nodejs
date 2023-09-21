@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { ROLE, STATUS, OBJECT } from "../../utils/constant";
 import sendEmail from "./sendEmailService";
+const { sequelize } = require("../models/index");
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -49,6 +50,14 @@ const handleUserLogin = async (data) => {
         } else {
             let user = await db.User.findOne({
                 where: { email: email },
+                include: [
+                    {
+                        model: db.AllCode,
+                        as: "genderData",
+                        attributes: ["valueEn", "valueVi"],
+                    },
+                ],
+                nest: true,
                 raw: true,
             });
             let data = {};
@@ -206,14 +215,12 @@ const handleEditUser = async (data) => {
             raw: false,
         });
         if (user) {
-            // const hashPass = bcrypt.hashSync(data.password, saltRounds);
             await user.update({
                 email: data.email,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 address: data.address,
                 dateOfBirth: data.date,
-                password: data.password,
                 phoneNumber: data.phoneNumber,
                 gender: data.gender,
                 positionId: data.position,
@@ -223,7 +230,7 @@ const handleEditUser = async (data) => {
             await user.save();
             return {
                 errorCode: 0,
-                message: "Create user successfully",
+                message: "Update user successfully",
             };
         } else {
             return {
@@ -615,14 +622,15 @@ const handlePostPatientBookAppointment = async (data) => {
     try {
         const {
             date,
+            timeType,
             entityId,
             namePatient,
             emailPatient,
             patientId,
-            timeType,
-            entityInfo,
             language,
+            entityInfo,
             patientInfo,
+            note,
             distinguishSubjectExamination,
             ...otherPropObj
         } = data;
@@ -663,6 +671,7 @@ const handlePostPatientBookAppointment = async (data) => {
                 date: date,
                 timeType: timeType,
                 token: token,
+                note: note,
             },
         });
         if (!created) {
@@ -678,7 +687,6 @@ const handlePostPatientBookAppointment = async (data) => {
                 language: language,
                 namePatient: namePatient,
                 emailPatient: emailPatient,
-                otherPropObj: otherPropObj,
             };
             await sendEmail(dataSendToEmail);
             return {
@@ -766,6 +774,114 @@ const handlePostSuccessBookAppointment = async (data) => {
     }
 };
 
+const handleGetBookingAppointment = async (patientId) => {
+    try {
+        let res = await db.Booking.findAll({
+            where: {
+                patientId: patientId,
+            },
+            attributes: ["timeType", "date", "id", "note", "status"],
+            order: [["id"]],
+            include: [
+                {
+                    model: db.User,
+                    as: "patientBookingData",
+                    attributes: [
+                        "address",
+                        "dateOfBirth",
+                        "email",
+                        "firstName",
+                        "lastName",
+                        "phoneNumber",
+                    ],
+                    include: [
+                        {
+                            model: db.AllCode,
+                            as: "genderData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
+                    ],
+                },
+                {
+                    model: db.hospital,
+                    as: "hospitalBookingData",
+                    attributes: ["address", "logo", "name"],
+                },
+                {
+                    model: db.User,
+                    as: "doctorBookingData",
+                    attributes: ["address", "firstName", "lastName", "image"],
+                    include: [
+                        {
+                            model: db.AllCode,
+                            as: "positionData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
+                        {
+                            model: db.DoctorInfo,
+                            as: "detailInfoData",
+                            attributes: ["address"],
+                        },
+                    ],
+                },
+                {
+                    model: db.Clinic,
+                    as: "clinicBookingData",
+                    attributes: ["address", "logo", "name"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "statusBookingData",
+                    attributes: ["valueVi", "valueEn"],
+                },
+                {
+                    model: db.AllCode,
+                    as: "timeTypeBookingData",
+                    attributes: ["valueVi", "valueEn"],
+                },
+            ],
+            nest: true,
+            raw: true,
+        });
+        if (res) {
+            res.forEach((item) => {
+                if (item.doctorBookingData && item.doctorBookingData.image) {
+                    item.doctorBookingData.logo = item.doctorBookingData.image;
+                    delete item.doctorBookingData.image;
+                }
+                if (
+                    item.doctorBookingData &&
+                    item.doctorBookingData.detailInfoData &&
+                    item.doctorBookingData.detailInfoData.address
+                ) {
+                    item.doctorBookingData.address =
+                        item.doctorBookingData.detailInfoData.address;
+                }
+                _.forOwn(item, function (value, key) {
+                    if (_.isObject(value)) {
+                        let arr = _.valuesIn(value);
+                        if (arr.includes(null)) {
+                            delete item[key];
+                        }
+                    }
+                });
+            });
+            return {
+                errorCode: 0,
+                message: "get booking successfully",
+                data: res,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "get booking failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
 export {
     handleUserLogin,
     handlGetAllUser,
@@ -786,4 +902,5 @@ export {
     handlePostPatientBookAppointment,
     handlePostVerifyBookAppointment,
     handlePostSuccessBookAppointment,
+    handleGetBookingAppointment,
 };

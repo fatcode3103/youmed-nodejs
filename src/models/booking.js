@@ -9,6 +9,32 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
+            Booking.belongsTo(models.User, {
+                foreignKey: "patientId",
+                as: "patientBookingData",
+            });
+            Booking.belongsTo(models.hospital, {
+                foreignKey: "hospitalId",
+                as: "hospitalBookingData",
+            });
+            Booking.belongsTo(models.User, {
+                foreignKey: "doctorId",
+                as: "doctorBookingData",
+            });
+            Booking.belongsTo(models.Clinic, {
+                foreignKey: "clinicId",
+                as: "clinicBookingData",
+            });
+            Booking.belongsTo(models.AllCode, {
+                foreignKey: "status",
+                targetKey: "keyMap",
+                as: "statusBookingData",
+            });
+            Booking.belongsTo(models.AllCode, {
+                foreignKey: "timeType",
+                targetKey: "keyMap",
+                as: "timeTypeBookingData",
+            });
         }
     }
     Booking.init(
@@ -30,5 +56,3 @@ module.exports = (sequelize, DataTypes) => {
     );
     return Booking;
 };
-
-// 1692032400000;

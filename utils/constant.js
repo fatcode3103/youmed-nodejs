@@ -15,3 +15,10 @@ export const OBJECT = {
     HOSPITAL: "HOSPITAL",
     CLINIC: "CLINIC",
 };
+
+export const TYPE_SEARCH_PARAM = {
+    DOCTOR: "doctor",
+    HOSPITAL: "hospital",
+    CLINIC: "clinic",
+    ALL: "all",
+};

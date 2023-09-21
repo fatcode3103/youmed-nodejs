@@ -9,8 +9,9 @@ const sendEmail = async (data) => {
         language,
         emailPatient,
         namePatient,
-        otherPropObj,
+        ...otherPropObj
     } = data;
+
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
