@@ -17,7 +17,6 @@ app.use(cors()); // Use this after the variable declaration
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-// viewEngine(app);
 initWebRoutes(app);
 
 connectDB();

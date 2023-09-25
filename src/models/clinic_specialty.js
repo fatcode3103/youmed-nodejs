@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
 
             Clinic_Specialty.belongsTo(models.Specialty, {
                 foreignKey: "specialtyId",
-                targetKey: "id",
                 as: "clinicSpecialtyDetailData",
             });
         }

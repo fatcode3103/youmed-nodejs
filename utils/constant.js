@@ -8,6 +8,14 @@ export const STATUS = {
     S1: "S1",
     S2: "S2",
     S3: "S3",
+    S4: "S4",
+};
+
+export const POSITION = {
+    NONE: "P1",
+    DOCTOR: "P2",
+    PROFESSOR: "P3",
+    NO_POSITION: "P4",
 };
 
 export const OBJECT = {

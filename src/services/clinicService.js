@@ -77,7 +77,6 @@ const handleGetClinicById = async (clinicId) => {
                             attributes: ["id", "valueVi", "valueEn"],
                         },
                     ],
-                    raw: true,
                 },
             ],
             nest: true,

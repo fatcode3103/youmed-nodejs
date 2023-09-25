@@ -264,6 +264,62 @@ const getBookingAppointment = async (req, res) => {
     }
 };
 
+const getAllExpert = async (req, res) => {
+    try {
+        let data = await userService.handleGetAllExpert();
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const cancelAppointmentById = async (req, res) => {
+    try {
+        let mess = await userService.handleCancelAppointmentById(
+            req.query.appointmentId
+        );
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const getAppointmentDoctorById = async (req, res) => {
+    try {
+        let data = await userService.handleGetAppointmentDoctorById(
+            req.query.doctorId
+        );
+        return res.status(200).json(data);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
+const completeAppointment = async (req, res) => {
+    try {
+        let mess = await userService.handleCompleteAppointment(req.query.token);
+        return res.status(200).json(mess);
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errorCode: 1,
+            message: "Error from the server",
+        });
+    }
+};
+
 export {
     handleLogin,
     getAllUser,
@@ -285,4 +341,8 @@ export {
     postVerifyBookAppointment,
     postSuccessBookAppointment,
     getBookingAppointment,
+    getAllExpert,
+    cancelAppointmentById,
+    getAppointmentDoctorById,
+    completeAppointment,
 };

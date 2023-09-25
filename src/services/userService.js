@@ -1,7 +1,8 @@
 import db from "../models";
 import { v4 as uuidv4 } from "uuid";
+const { Op } = require("sequelize");
 
-import { ROLE, STATUS, OBJECT } from "../../utils/constant";
+import { ROLE, STATUS, OBJECT, POSITION } from "../../utils/constant";
 import sendEmail from "./sendEmailService";
 const { sequelize } = require("../models/index");
 
@@ -247,6 +248,15 @@ const handleGetUserById = async (id) => {
     try {
         const user = await db.User.findOne({
             where: { id: id },
+            include: [
+                {
+                    model: db.AllCode,
+                    as: "genderData",
+                    attributes: ["valueVi", "valueEn"],
+                },
+            ],
+            nest: true,
+            raw: true,
         });
         if (user) {
             return {
@@ -882,6 +892,171 @@ const handleGetBookingAppointment = async (patientId) => {
     }
 };
 
+const handleGetAllExpert = async () => {
+    try {
+        let res = await db.User.findAll({
+            where: {
+                [Op.or]: [
+                    {
+                        positionId: POSITION.DOCTOR,
+                    },
+                    {
+                        positionId: POSITION.PROFESSOR,
+                    },
+                ],
+            },
+            limit: 6,
+            attributes: ["firstName", "lastName", "id", "image"],
+            include: [
+                {
+                    model: db.AllCode,
+                    as: "positionData",
+                    attributes: ["valueVi", "valueEn"],
+                },
+                {
+                    model: db.Doctor_Specialty,
+                    as: "doctorSpecialtyData",
+                    attributes: ["doctorIdKey"],
+                    include: [
+                        {
+                            model: db.Specialty,
+                            as: "specialtyData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
+                    ],
+                },
+            ],
+            nest: true,
+            raw: true,
+        });
+        if (res) {
+            let doctorMap = {};
+            res.forEach((item) => {
+                let { ...rest } = item;
+                if (!doctorMap[item.id]) {
+                    doctorMap[item.id] = {
+                        ...rest,
+                        specialtyData: [],
+                    };
+                }
+                doctorMap[item.id].specialtyData.push(
+                    item.doctorSpecialtyData.specialtyData
+                );
+                delete doctorMap[item.id].doctorSpecialtyData;
+            });
+            const modifyRes = Object.values(doctorMap);
+
+            return {
+                errorCode: 0,
+                message: "get success",
+                data: modifyRes,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "get failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleCancelAppointmentById = async (appointmentId) => {
+    try {
+        let res = await db.Booking.findOne({
+            where: { id: appointmentId },
+            raw: false,
+        });
+        if (res) {
+            await res.update({
+                status: STATUS.S4,
+            });
+            await res.save();
+            return {
+                errorCode: 0,
+                message: "Update status success",
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Update status failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleGetAppointmentDoctorById = async (doctorId) => {
+    try {
+        let res = await db.Booking.findAll({
+            where: { doctorId: doctorId },
+            include: [
+                {
+                    model: db.User,
+                    as: "patientBookingData",
+                    attributes: { exclude: ["image", "password"] },
+                    include: [
+                        {
+                            model: db.AllCode,
+                            as: "genderData",
+                            attributes: ["valueVi", "valueEn"],
+                        },
+                    ],
+                },
+                {
+                    model: db.AllCode,
+                    as: "statusBookingData",
+                    attributes: ["valueVi", "valueEn"],
+                },
+            ],
+        });
+        if (res) {
+            return {
+                errorCode: 0,
+                message: "Get appointment doctor by id success",
+                data: res,
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message: "Get appointment doctor by id failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+const handleCompleteAppointment = async (token) => {
+    try {
+        let res = await db.Booking.findOne({
+            where: { token: token },
+            raw: false,
+        });
+        if (res) {
+            await res.update({
+                status: STATUS.S3,
+            });
+            await res.save();
+            return {
+                errorCode: 0,
+                message:
+                    "Update the completed status for the examination schedule success",
+            };
+        } else {
+            return {
+                errorCode: 2,
+                message:
+                    "Update the completed status for the examination schedule failed",
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
 export {
     handleUserLogin,
     handlGetAllUser,
@@ -903,4 +1078,8 @@ export {
     handlePostVerifyBookAppointment,
     handlePostSuccessBookAppointment,
     handleGetBookingAppointment,
+    handleGetAllExpert,
+    handleCancelAppointmentById,
+    handleGetAppointmentDoctorById,
+    handleCompleteAppointment,
 };
