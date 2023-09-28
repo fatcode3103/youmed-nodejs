@@ -1,6 +1,8 @@
 const { Op } = require("sequelize");
 import db from "../models";
-import { ROLE, TYPE_SEARCH_PARAM } from "../../utils/constant";
+const constants = require("../../utils/constant");
+
+const { ROLE, STATUS, POSITION, OBJECT, TYPE_SEARCH_PARAM } = constants;
 
 const handleModifyQuerySearch = (res, type = "") => {
     const obj = {};

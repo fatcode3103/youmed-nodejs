@@ -2,9 +2,11 @@ import db from "../models";
 import { v4 as uuidv4 } from "uuid";
 const { Op } = require("sequelize");
 
-import { ROLE, STATUS, OBJECT, POSITION } from "../../utils/constant";
 import sendEmail from "./sendEmailService";
 const { sequelize } = require("../models/index");
+const constants = require("../../utils/constant");
+
+const { ROLE, STATUS, POSITION, OBJECT, TYPE_SEARCH_PARAM } = constants;
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
