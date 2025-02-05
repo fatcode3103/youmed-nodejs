@@ -19,6 +19,8 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 initWebRoutes(app);
 
+console.log("check prev-connectDB...")
+
 connectDB();
 
 const port = process.env.PORT;

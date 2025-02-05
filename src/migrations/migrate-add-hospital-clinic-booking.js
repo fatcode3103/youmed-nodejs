@@ -1,10 +1,10 @@
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return Promise.all([
-            queryInterface.addColumn("bookings", "hospitalId", {
+            queryInterface.addColumn("Bookings", "hospitalId", {
                 type: Sequelize.INTEGER,
             }),
-            queryInterface.addColumn("bookings", "clinicId", {
+            queryInterface.addColumn("Bookings", "clinicId", {
                 type: Sequelize.INTEGER,
             }),
         ]);
@@ -12,8 +12,8 @@ module.exports = {
 
     down: (queryInterface, Sequelize) => {
         return Promise.all([
-            queryInterface.removeColumn("bookings", "hospitalId"),
-            queryInterface.removeColumn("bookings", "clinicId"),
+            queryInterface.removeColumn("Bookings", "hospitalId"),
+            queryInterface.removeColumn("Bookings", "clinicId"),
         ]);
     },
 };

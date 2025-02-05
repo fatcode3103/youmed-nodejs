@@ -2,12 +2,12 @@ module.exports = {
     up: (queryInterface, Sequelize) => {
         return Promise.all([
             queryInterface.renameColumn(
-                "doctor_specialties",
+                "Doctor_Specialties",
                 "doctorId",
                 "doctorIdKey"
             ),
             queryInterface.renameColumn(
-                "doctor_specialties",
+                "Doctor_Specialties",
                 "specialtyId",
                 "specialtyIdKey"
             ),
@@ -17,12 +17,12 @@ module.exports = {
     down: (queryInterface, Sequelize) => {
         return Promise.all([
             queryInterface.renameColumn(
-                "doctor_specialties",
+                "Doctor_Specialties",
                 "doctorIdKey",
                 "doctorId"
             ),
             queryInterface.renameColumn(
-                "doctor_specialties",
+                "Doctor_Specialties",
                 "specialtyIdKey",
                 "specialtyId"
             ),

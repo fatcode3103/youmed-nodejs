@@ -1,11 +1,11 @@
 module.exports = {
     up: function (queryInterface, Sequelize) {
         // logic for transforming into the new state
-        return queryInterface.addColumn("bookings", "token", Sequelize.STRING);
+        return queryInterface.addColumn("Bookings", "token", Sequelize.STRING);
     },
 
     down: function (queryInterface, Sequelize) {
         // logic for reverting the changes
-        return queryInterface.removeColumn("bookings", "token");
+        return queryInterface.removeColumn("Bookings", "token");
     },
 };

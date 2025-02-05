@@ -1,7 +1,7 @@
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return Promise.all([
-            queryInterface.changeColumn("users", "dateOfBirth", {
+            queryInterface.changeColumn("Users", "dateOfBirth", {
                 type: Sequelize.STRING,
             }),
         ]);
@@ -9,7 +9,7 @@ module.exports = {
 
     down: (queryInterface, Sequelize) => {
         return Promise.all([
-            queryInterface.changeColumn("user", "dateOfBirth", {
+            queryInterface.changeColumn("Users", "dateOfBirth", {
                 type: Sequelize.STRING,
             }),
         ]);
